@@ -1,4 +1,6 @@
-// Obfuscate key so it's less easy for bots trawling GitHub to read
+function retrieveWeatherData(city){
+
+// Obfuscate key so it's less easy for bots trawling GitHub to read straight off the repo.
 var bue = "";
 var vvg = "";
 for (let i = 5; i > -1; i--){
@@ -14,9 +16,21 @@ for (let i = 5; i > -1; i--){
     let string = "f25f4"
     kfl = kfl + string.charAt(i)
 }
-
 var sre = "f2b"+"c3f"
-
 const abc = fsh+bue+prw+kfl+sre+vvg
 
+// Call the OpenWeatherAPI
 
+const queryURL = "https://api.openweathermap.org/data/2.5/forecast?q=+"+city+"+&APPID="+abc
+$.ajax({
+    url: queryURL,
+    method: "GET"
+  })
+    // After the data comes back from the API pass it into the rendering function
+    .then(function(response) {weatherRender(response)})
+}
+
+
+function weatherRender(){
+
+}
