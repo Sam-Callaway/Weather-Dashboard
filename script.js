@@ -1,3 +1,10 @@
+var cityName = $("#cityname");
+var cityTemp = $("#citytemp");
+var cityWind = $("#citywind");
+var cityHumidity = $("#cityhumidity");
+
+
+
 function retrieveWeatherData(city){
 
 // Obfuscate key so it's less easy for bots trawling GitHub to read straight off the repo
@@ -19,22 +26,43 @@ for (let i = 5; i > -1; i--){
 var sre = "f2b"+"c3f"
 const abc = fsh+bue+prw+kfl+sre+vvg
 
-// Call the OpenWeatherAPI
+// Call the OpenWeatherAPI for current
 
-const queryURL = "https://api.openweathermap.org/data/2.5/forecast?q=+"+city+"+&APPID="+abc
+const queryURL = "https://api.openweathermap.org/data/2.5/weather?q=+"+city+"+&APPID="+abc
 $.ajax({
     url: queryURL,
     method: "GET"
   })
     // After the data comes back from the API pass it into the rendering function
-    .then(function(response) {weatherRender(response)})
+    .then(function(response) {currentWeatherRender(response)})
+
+// Call the OpenWeatherAPI for the forecast
+
+const queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=+"+city+"+&APPID="+abc
+$.ajax({
+    url: queryURL2,
+    method: "GET"
+  })
+    // After the data comes back from the API pass it into the rendering function
+    .then(function(response) {weatherForecastRender(response)})
+
 }
 
 
-function weatherRender(weather){
+function currentWeatherRender(weather){
+    cityName.text(`${weather.name} ${moment().format("(D/M/YYYY)")}`);
+    cityTemp.text(`Temp: ${(weather.main.temp-273.15).toFixed(2)} °C`);
+    cityWind.text(`Wind: ${(weather.wind.speed).toFixed(1)} km/h`);
+    cityHumidity.text(`Humidity: ${weather.main.humidity}%`)
+    $("#today").removeClass('hide')
+}
+
+function weatherForecastRender(weather){
     console.log(weather)
     
-
+    
+    $("#forecast").removeClass('hide')
+    $("#forecastHeader").removeClass('hide')
 }
 
 $('#search-button').on('click',function(event){
@@ -52,3 +80,4 @@ $('.previous-button').on('click',function(event){
     console.log(city)
     //retrieveWeatherData(city)
 })
+
