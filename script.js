@@ -1,6 +1,6 @@
 function retrieveWeatherData(city){
 
-// Obfuscate key so it's less easy for bots trawling GitHub to read straight off the repo.
+// Obfuscate key so it's less easy for bots trawling GitHub to read straight off the repo
 var bue = "";
 var vvg = "";
 for (let i = 5; i > -1; i--){
@@ -31,6 +31,24 @@ $.ajax({
 }
 
 
-function weatherRender(){
+function weatherRender(weather){
+    console.log(weather)
+    
 
 }
+
+$('#search-button').on('click',function(event){
+    event.preventDefault();
+    event.stopPropagation();
+    const city = $('#search-input').val();
+    console.log(city)
+    retrieveWeatherData(city)
+})
+
+$('.previous-button').on('click',function(event){
+    event.preventDefault();
+    event.stopPropagation();
+    const city = $(this).text();
+    console.log(city)
+    //retrieveWeatherData(city)
+})
