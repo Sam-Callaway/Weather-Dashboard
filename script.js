@@ -2,7 +2,7 @@ var cityName = $("#cityname");
 var cityTemp = $("#citytemp");
 var cityWind = $("#citywind");
 var cityHumidity = $("#cityhumidity");
-
+var forecastEl = $("#forecast");
 
 
 function retrieveWeatherData(city){
@@ -59,10 +59,28 @@ function currentWeatherRender(weather){
 
 function weatherForecastRender(weather){
     console.log(weather)
+        weather.list.forEach(element => {
+        const time = moment.unix(element.dt)
+        if(time.format("HH:mm:ss")==="12:00:00"){forecastCardGenerator(element,forecastEl)}
+    });
+
     
-    
-    $("#forecast").removeClass('hide')
+    forecastEl.removeClass('hide')
     $("#forecastHeader").removeClass('hide')
+}
+
+// Generates cards and appends to div on page. Requires jQuery object for parent div.
+function forecastCardGenerator(details,parentdiv){
+
+const newCard = $('<div class="card" style="width: 7rem;">')
+
+
+`<div class="card-body">
+      <h5 class="card-title"></h5>
+      <p class="card-text"></p>
+      <p class="card-text"></p>
+      <p class="card-text"></p>
+ </div>`
 }
 
 $('#search-button').on('click',function(event){
