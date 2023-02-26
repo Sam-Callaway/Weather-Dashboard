@@ -51,6 +51,7 @@ $.ajax({
 
 
 function currentWeatherRender(weather){
+    $("#today").addClass('hide')
     console.log(weather)
     cityName.text(`${weather.name} ${moment().format("(D/M/YYYY)")}`);
     cityTemp.text(`Temp: ${(weather.main.temp-273.15).toFixed(2)} °C`);
@@ -62,14 +63,23 @@ function currentWeatherRender(weather){
 
 function weatherForecastRender(weather){
     console.log(weather)
+    forecastEl.addClass('hide')
+    $("#forecastHeader").addClass('hide')
+    forecastEl.empty();
+    // Need to adjust the hour of day we're getting as the API is not in local time so doesn't always provide 12PM local
+    const realHour = timeZoneCalc(weather.city.timezone)
+    let cardCount = 0
         weather.list.forEach(element => {
         const time = moment.unix(element.dt)
-        if(time.format("HH:mm:ss")==="12:00:00"){forecastCardGenerator(element,forecastEl)}
+        
+        // We want the midday forecasts and also want to exclude any forecasts for this day
+        if((time.format("HH")===realHour)&&(time.format("DD")!=moment().format("DD"))){console.log(time);forecastCardGenerator(element,forecastEl); cardCount++}
     });
-  
+    if(cardCount<5){$("#forecastHeader").text(`${cardCount}-Day Forecast:`)}
     forecastEl.removeClass('hide')
     $("#forecastHeader").removeClass('hide')
 }
+
 
 // Generates cards and appends to div on page. Requires jQuery object for parent div.
 function forecastCardGenerator(details,parentdiv){
@@ -87,11 +97,20 @@ newCard.html(
  parentdiv.append(newCard);
 }
 
+// We need to round to the nearest 3 hours from 12PM to find the time we want as we only get forecast objects for every 3 hours.
+// So we can't do, for example, 12PM exact in Berlin as that's 1PM GMT which we don't get in the API
+function roundNearest (value, nearest){return(Math.round(value / nearest) * nearest)};
+function timeZoneCalc(secondsAdded){
+    console.log(roundNearest(-secondsAdded/60/60,3))
+    let nearestHour = moment('12:00:00','HH:mm:ss').add(roundNearest(-secondsAdded/60/60,3),'h');
+    return nearestHour.format('HH')
+}
+
+
 $('#search-button').on('click',function(event){
     event.preventDefault();
     event.stopPropagation();
     const city = $('#search-input').val();
-    console.log(city)
     retrieveWeatherData(city)
 })
 
@@ -99,7 +118,6 @@ $('.previous-button').on('click',function(event){
     event.preventDefault();
     event.stopPropagation();
     const city = $(this).text();
-    console.log(city)
     //retrieveWeatherData(city)
 })
 
