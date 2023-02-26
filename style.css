@@ -1,10 +1,14 @@
-.cityTitle{
-       
-}
 .cityStat{
     padding:10px;
 }
 
 .hide{
-    display: none;
+    display: none;    
+}
+.card-body{
+    margin-right:10px;
+    margin-bottom: 10px;
+}
+#forecast{
+    justify-content: space-around;
 }

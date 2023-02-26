@@ -2,6 +2,7 @@ var cityName = $("#cityname");
 var cityTemp = $("#citytemp");
 var cityWind = $("#citywind");
 var cityHumidity = $("#cityhumidity");
+var cityImg = $("#cityimg")
 var forecastEl = $("#forecast");
 
 
@@ -50,10 +51,12 @@ $.ajax({
 
 
 function currentWeatherRender(weather){
+    console.log(weather)
     cityName.text(`${weather.name} ${moment().format("(D/M/YYYY)")}`);
     cityTemp.text(`Temp: ${(weather.main.temp-273.15).toFixed(2)} °C`);
     cityWind.text(`Wind: ${(weather.wind.speed).toFixed(1)} km/h`);
     cityHumidity.text(`Humidity: ${weather.main.humidity}%`)
+    cityImg.attr('src','http://openweathermap.org/img/w/'+weather.weather[0].icon+'.png')
     $("#today").removeClass('hide')
 }
 
@@ -63,8 +66,7 @@ function weatherForecastRender(weather){
         const time = moment.unix(element.dt)
         if(time.format("HH:mm:ss")==="12:00:00"){forecastCardGenerator(element,forecastEl)}
     });
-
-    
+  
     forecastEl.removeClass('hide')
     $("#forecastHeader").removeClass('hide')
 }
@@ -72,15 +74,17 @@ function weatherForecastRender(weather){
 // Generates cards and appends to div on page. Requires jQuery object for parent div.
 function forecastCardGenerator(details,parentdiv){
 
-const newCard = $('<div class="card" style="width: 7rem;">')
-
-
+const newCard = $('<div class="card" style="width: 10rem;">')
+newCard.html(
 `<div class="card-body">
-      <h5 class="card-title"></h5>
-      <p class="card-text"></p>
-      <p class="card-text"></p>
-      <p class="card-text"></p>
- </div>`
+      <h6 class="card-title">${moment.unix(details.dt).format("D/M/YYYY")}</h6>
+      <img src="http://openweathermap.org/img/w/${details.weather[0].icon}.png">
+      <p class="card-text">Temp: ${(details.main.temp-273.15).toFixed(2)} °C</p>
+      <p class="card-text">Wind: ${(details.wind.speed).toFixed(1)} km/h</p>
+      <p class="card-text">Humidity: ${details.main.humidity}%</p>
+ </div>`)
+
+ parentdiv.append(newCard);
 }
 
 $('#search-button').on('click',function(event){
