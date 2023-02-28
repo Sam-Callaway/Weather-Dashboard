@@ -74,7 +74,7 @@ function weatherForecastRender(weather){
         // We want the midday forecasts and also want to exclude any forecasts for today
         if((time.format("HH")===realHour)&&(time.format("DD")!=moment().format("DD"))){forecastCardGenerator(element,forecastEl); cardCount++}
     });
-    // Sometimes depending on when it's run I think it might only have 4 forecasts so just change the header accordingly
+    // Sometimes depending on when it's run there will only be 4 midday forecasts available so just change the header accordingly
     if(cardCount<5)
         {$("#forecastHeader").text(`${cardCount}-Day Forecast:`);$("#sorryMsg").removeClass('hide')}
         else
@@ -142,6 +142,7 @@ searchHistoryRender();
         
 }
 
+// Get each of the saved search elements, create buttons for them and add to page
 function searchHistoryRender(){
     $("#history").empty()
     let cityList = JSON.parse(localStorage.getItem("cityList"))
