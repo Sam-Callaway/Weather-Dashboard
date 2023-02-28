@@ -12,3 +12,13 @@
 #forecast{
     justify-content: space-around;
 }
+
+.previous-button{
+    margin:3px;
+    max-width: 16rem;
+}
+
+/* .list-group{
+    justify-content: space-around;
+    flex: auto;
+} */

@@ -52,7 +52,7 @@ $.ajax({
 
 function currentWeatherRender(weather){
     $("#today").addClass('hide')
-    console.log(weather)
+    searchSaver(weather.name)
     cityName.text(`${weather.name} ${moment().format("(D/M/YYYY)")}`);
     cityTemp.text(`Temp: ${(weather.main.temp-273.15).toFixed(2)} °C`);
     cityWind.text(`Wind: ${(weather.wind.speed).toFixed(1)} km/h`);
@@ -62,20 +62,23 @@ function currentWeatherRender(weather){
 }
 
 function weatherForecastRender(weather){
-    console.log(weather)
     forecastEl.addClass('hide')
     $("#forecastHeader").addClass('hide')
     forecastEl.empty();
-    // Need to adjust the hour of day we're getting as the API is not in local time so doesn't always provide 12PM local
+    // Need to adjust the hour of day we're getting as the API is in GMT
     const realHour = timeZoneCalc(weather.city.timezone)
     let cardCount = 0
         weather.list.forEach(element => {
         const time = moment.unix(element.dt)
         
-        // We want the midday forecasts and also want to exclude any forecasts for this day
-        if((time.format("HH")===realHour)&&(time.format("DD")!=moment().format("DD"))){console.log(time);forecastCardGenerator(element,forecastEl); cardCount++}
+        // We want the midday forecasts and also want to exclude any forecasts for today
+        if((time.format("HH")===realHour)&&(time.format("DD")!=moment().format("DD"))){forecastCardGenerator(element,forecastEl); cardCount++}
     });
-    if(cardCount<5){$("#forecastHeader").text(`${cardCount}-Day Forecast:`)}
+    // Sometimes depending on when it's run I think it might only have 4 forecasts so just change the header accordingly
+    if(cardCount<5)
+        {$("#forecastHeader").text(`${cardCount}-Day Forecast:`);$("#sorryMsg").removeClass('hide')}
+        else
+        {$("#forecastHeader").text("5-Day Forecast:");$("#sorryMsg").addClass('hide')}
     forecastEl.removeClass('hide')
     $("#forecastHeader").removeClass('hide')
 }
@@ -97,13 +100,63 @@ newCard.html(
  parentdiv.append(newCard);
 }
 
-// We need to round to the nearest 3 hours from 12PM to find the time we want as we only get forecast objects for every 3 hours.
+// We need to round to the nearest 3 hours from 12PM to find the time we want to pull as we only get forecast objects for every 3 hours.
 // So we can't do, for example, 12PM exact in Berlin as that's 1PM GMT which we don't get in the API
 function roundNearest (value, nearest){return(Math.round(value / nearest) * nearest)};
 function timeZoneCalc(secondsAdded){
-    console.log(roundNearest(-secondsAdded/60/60,3))
     let nearestHour = moment('12:00:00','HH:mm:ss').add(roundNearest(-secondsAdded/60/60,3),'h');
     return nearestHour.format('HH')
+}
+
+function searchSaver(city){
+    // If the list doesn't exist, create it and save the city name
+    if(localStorage.getItem("cityList")===null){
+        let cityList = [city]
+        localStorage.setItem("cityList",JSON.stringify(cityList))
+    } 
+    else
+    {
+        let cityList = JSON.parse(localStorage.getItem("cityList"))
+        // Check if the city is in the list already
+        if (cityList.indexOf(city) === -1){
+            console.log(cityList.length)
+            // We only want to keep the 7 most recent so if there is more than 6 this time we remove the end element which is the oldest searched.
+            if (cityList.length > 6){
+                for(i=0;i<(cityList.length-5);i++){cityList.pop()}
+                cityList.unshift(city)
+                localStorage.setItem("cityList",JSON.stringify(cityList))
+            }
+            else{
+                // Otherwise we just add this city to the front
+                cityList.unshift(city)
+                localStorage.setItem("cityList",JSON.stringify(cityList))
+            }
+        // If the city already is in the list then move it to the front
+        } else {
+            cityList.splice(cityList.indexOf(city),1)
+            cityList.unshift(city)
+            localStorage.setItem("cityList",JSON.stringify(cityList))
+        }
+    }
+searchHistoryRender();
+        
+}
+
+function searchHistoryRender(){
+    $("#history").empty()
+    let cityList = JSON.parse(localStorage.getItem("cityList"))
+    cityList.forEach(element => {
+        const newBtn = $('<button>');
+        newBtn.text(element)
+        newBtn.addClass("previous-button btn btn-primary")
+        $("#history").append(newBtn)
+    });
+    $('.previous-button').on('click',function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        const city = $(this).text();
+        retrieveWeatherData(city)
+    })
 }
 
 
@@ -114,10 +167,6 @@ $('#search-button').on('click',function(event){
     retrieveWeatherData(city)
 })
 
-$('.previous-button').on('click',function(event){
-    event.preventDefault();
-    event.stopPropagation();
-    const city = $(this).text();
-    //retrieveWeatherData(city)
-})
 
+
+searchHistoryRender();
